@@ -1,0 +1,13 @@
+timestamp,app_id,kind,exe_path,pid,event,action
+2026-07-26T00:37:45,C:#Program Files#Google#Chrome#Application#chrome.exe,desktop,C:\Program Files\Google\Chrome\Application\chrome.exe,768,camera_opened,
+2026-07-26T00:38:08,C:#Program Files#Google#Chrome#Application#chrome.exe,desktop,C:\Program Files\Google\Chrome\Application\chrome.exe,768,user_decision,blocked_terminated
+2026-07-26T00:38:47,Microsoft.WindowsCamera_8wekyb3d8bbwe,packaged,,,camera_opened,
+2026-07-26T00:38:47,C:#Program Files#Google#Chrome#Application#chrome.exe,desktop,C:\Program Files\Google\Chrome\Application\chrome.exe,,camera_closed,
+2026-07-26T00:39:11,Microsoft.WindowsCamera_8wekyb3d8bbwe,packaged,,,user_decision,block_failed_no_pid
+2026-07-26T00:39:17,Microsoft.WindowsCamera_8wekyb3d8bbwe,packaged,,,camera_closed,
+2026-07-26T00:39:21,C:#Program Files#Google#Chrome#Application#chrome.exe,desktop,C:\Program Files\Google\Chrome\Application\chrome.exe,3060,camera_opened,
+2026-07-26T00:39:33,C:#Program Files#Google#Chrome#Application#chrome.exe,desktop,C:\Program Files\Google\Chrome\Application\chrome.exe,3060,user_decision,allowed
+2026-07-26T00:39:37,C:#Program Files#Google#Chrome#Application#chrome.exe,desktop,C:\Program Files\Google\Chrome\Application\chrome.exe,,camera_closed,
+2026-07-26T00:39:39,C:#Program Files#Google#Chrome#Application#chrome.exe,desktop,C:\Program Files\Google\Chrome\Application\chrome.exe,3060,camera_opened,
+2026-07-26T00:39:43,C:#Program Files#Google#Chrome#Application#chrome.exe,desktop,C:\Program Files\Google\Chrome\Application\chrome.exe,3060,user_decision,blocked_terminated
+2026-07-26T00:40:33,C:#Program Files#Google#Chrome#Application#chrome.exe,desktop,C:\Program Files\Google\Chrome\Application\chrome.exe,,camera_closed,

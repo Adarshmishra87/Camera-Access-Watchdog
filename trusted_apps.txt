@@ -1,0 +1,2 @@
+# One process name per line, e.g. Teams.exe
+# These are still logged, just not popped up.
