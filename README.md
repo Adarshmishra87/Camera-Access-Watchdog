@@ -87,16 +87,3 @@ console window stays open).
   detect. If you're worried about that specific scenario, a physical
   camera cover is still the only 100% guarantee.
 
-## Ideas to extend it (good next portfolio additions)
-
-- Resolve packaged-app `PackageFamilyName` → friendly name via
-  `Windows.Management.Deployment.PackageManager` for nicer alert text
-- Add a system tray icon (`pystray`) instead of only console + popups
-- Ship a "quarantine" mode: on Block, also suspend the process
-  (`psutil.Process.suspend()`) before deciding whether to fully kill it
-- Extend the same pattern to the **microphone** ConsentStore key
-  (`...\ConsentStore\microphone`) — same technique, same registry shape
-- On Linux, an analogous (much rougher) approach is polling
-  `lsof /dev/video0` or watching `/sys/class/video4linux/*/name` combined
-  with process file-descriptor scanning — no registry equivalent exists,
-  so attribution is less clean
