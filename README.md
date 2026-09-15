@@ -1,4 +1,3 @@
-make like this
 # Camera Access Watchdog
 
 A Windows security-monitoring tool that detects camera-access activity, identifies the responsible application or process when possible, and alerts the user in real time.
