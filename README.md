@@ -1,261 +1,298 @@
-# Camera Access Watchdog
+# ☕ TempShield — Disposable Email Client
 
-A Windows security-monitoring tool that detects camera-access activity, identifies the responsible application or process when possible, and alerts the user in real time.
+A lightweight Java desktop email client that generates disposable email addresses, monitors incoming messages in real time, detects OTPs, and provides one-click clipboard copying.
 
-The tool monitors Windows camera-access records through the `CapabilityAccessManager` ConsentStore, attempts to resolve process information using `psutil`, and records events and user decisions in a CSV audit log.
+The tool uses Java Swing for its graphical interface, the Guerrilla Mail API for temporary inbox functionality, `HttpURLConnection` for HTTP communication, `org.json` for response parsing, and `ExecutorService` for background inbox polling.
 
-> Windows only. This project depends on Windows-specific registry keys and APIs.
+> Use only for lawful, authorized, and privacy-conscious purposes. Do not use disposable email services for spam, fraud, harassment, unauthorized access, or bypassing service restrictions.
 
 ## Features
 
-- Polls camera-access records at a configurable interval.
-- Detects camera open and close activity where Windows exposes corresponding records.
-- Identifies the responsible application, executable path, and process ID when available.
-- Displays real-time alerts for unexpected camera activity.
-- Supports `Allow` and `Block & Kill` actions.
-- Logs camera events and user decisions to a CSV audit file.
-- Supports a trusted-application allowlist.
-- Provides a one-shot camera-status check.
-- Supports background monitoring through Windows Task Scheduler.
-- Handles packaged-application limitations without silently treating missing process information as a failure.
+- Generates disposable email addresses instantly.
+- Supports multiple Guerrilla Mail domains.
+- Polls the inbox automatically every 15 seconds.
+- Displays incoming messages in real time.
+- Shows sender, subject, message content, and received time.
+- Detects OTPs and verification codes automatically.
+- Copies email addresses and OTPs with one click.
+- Includes a built-in one-hour mailbox countdown.
+- Provides a modern dark-themed Java Swing interface.
+- Uses background tasks to keep the interface responsive.
+- Requires no build framework or dependency manager.
+- Communicates with the Guerrilla Mail API over HTTP.
 
 ## How It Works
 
-Windows manages application permissions for sensitive resources such as the camera through its privacy and capability-management systems.
+TempShield communicates with the Guerrilla Mail API to create and monitor a temporary mailbox.
 
-This project reads camera-related entries from the Windows `CapabilityAccessManager` ConsentStore and compares changes over time.
+When the application starts, it:
 
-When a relevant change is detected, the tool:
+1. Requests a disposable email address.
+2. Displays the address in the Swing interface.
+3. Starts a background polling task.
+4. Checks for new messages at the configured interval.
+5. Parses the returned JSON data.
+6. Displays available email details.
+7. Searches message content for OTPs and verification codes.
+8. Provides one-click clipboard actions.
+9. Tracks the mailbox lifetime with a countdown timer.
 
-1. Reads the camera-access entry.
-2. Identifies the application or package.
-3. Attempts to resolve a live process using `psutil`.
-4. Displays an alert when the application is not trusted.
-5. Records the event and user decision in the CSV audit log.
+Background work is handled with `ExecutorService` so that network requests do not freeze the graphical interface.
 
-The tool does not query or control the physical webcam LED. It monitors operating-system records instead.
+The application monitors messages through the API. It does not provide permanent email storage and should not be used for sensitive or confidential communication.
 
 ## Requirements
 
-- Windows 10 or Windows 11.
-- Python 3.9 or later.
-- `psutil`.
-- Tkinter, if the graphical alert interface is enabled.
-- Permission to read the required Windows registry entries.
+- Java 11 or later.
+- Windows, Linux, or macOS.
+- An active internet connection.
+- Access to the Guerrilla Mail API.
+- The `org.json` library.
+- Permission to use the disposable email service.
 
 ## Installation
 
 Clone the repository:
 
 ```bash
-git clone [https://github.com/Adarshmishra87/Camera-Access-Watchdog.git](https://github.com/Adarshmishra87/Camera-Access-Watchdog.git)
-cd Camera-Access-Watchdog
+git clone [https://github.com/Adarshmishra87/TempShield.git](https://github.com/Adarshmishra87/TempShield.git)
+cd TempShield
 ```
 
-Create a virtual environment:
+Download the JSON library:
 
 ```bash
-python -m venv .venv
+curl -L "[https://repo1.maven.org/maven2/org/json/json/20231013/json-20231013.jar](https://repo1.maven.org/maven2/org/json/json/20231013/json-20231013.jar)" \
+  -o json-20231013.jar
 ```
 
-Activate it on Windows:
-
-```bash
-.venv\Scripts\activate
-```
-
-Install dependencies:
-
-```bash
-pip install -r requirements.txt
-```
+No additional package installation is required.
 
 ## Usage
 
-### Start continuous monitoring
+### Windows
+
+Double-click the following script:
+
+```text
+build_and_run.bat
+```
+
+Or compile and run manually:
 
 ```bash
-python camera_watchdog.py
+javac -cp json-20231013.jar src/TempMailApp.java -d out/
+java -cp "out;json-20231013.jar" TempMailApp
 ```
 
-The tool continuously monitors camera-access records and displays an alert when it detects activity from an application that is not trusted.
+### Linux/macOS
 
-### Check current camera status
+Make the script executable:
 
 ```bash
-python camera_watchdog.py --status
+chmod +x build_and_run.sh
 ```
 
-This performs a one-time status check and exits.
-
-### Run without a console window
-
-Use `pythonw.exe` when launching the tool through a shortcut or Windows Task Scheduler:
+Run the application:
 
 ```bash
-pythonw.exe camera_watchdog.py
+./build_and_run.sh
 ```
 
-## Trusted Applications
+Or compile and run manually:
 
-Create a file named `trusted_apps.txt` in the project directory:
+```bash
+javac -cp json-20231013.jar src/TempMailApp.java -d out/
+java -cp "out:json-20231013.jar" TempMailApp
+```
+
+## Inbox Monitoring
+
+The inbox is refreshed automatically every 15 seconds by default.
+
+The polling interval is configured in `TempMailApp.java`. Look for the scheduled background task:
+
+```java
+scheduleAtFixedRate(task, 0, 15, TimeUnit.SECONDS);
+```
+
+To refresh every 30 seconds:
+
+```java
+scheduleAtFixedRate(task, 0, 30, TimeUnit.SECONDS);
+```
+
+A shorter interval may show new messages sooner but can result in more API requests. A longer interval reduces requests but may delay inbox updates.
+
+## OTP Detection
+
+TempShield searches incoming message content for common OTP and verification-code patterns.
+
+Example formats may include:
 
 ```text
-Teams.exe
-Zoom.exe
-Discord.exe
-chrome.exe
-msedge.exe
+123456
+OTP: 123456
+Code: 123456
+Your verification code is 123456
 ```
 
-Trusted applications will not trigger a popup, but their events should still be recorded in the audit log.
+OTP detection is pattern-based and may not recognize every message format. Review the detected code before using it.
 
-Use one executable name per line. Add an application only if you recognize and trust it.
+## Clipboard Actions
 
-## Alert Actions
+The interface provides one-click copying for:
 
-When an alert is displayed, the tool can provide the following actions:
+- The generated disposable email address.
+- Detected OTPs or verification codes.
 
-- **Allow:** Dismiss the alert and continue monitoring.
-- **Block & Kill:** Attempt to terminate the identified process.
-- **Ignore or close:** Keep the process running while recording the event, depending on the implementation.
-
-Process termination may fail when:
-
-- The process belongs to another user.
-- The process requires administrator privileges.
-- The event belongs to a packaged Microsoft Store application.
-- The process has already exited.
-- Windows prevents termination.
-
-Always verify the process name and executable path before terminating it.
-
-## Audit Logging
-
-The tool records monitoring activity in:
-
-```text
-camera_access_log.csv
-```
-
-Typical fields may include:
-
-```text
-timestamp
-event_type
-application
-executable_path
-process_id
-access_state
-user_action
-```
-
-The log can be opened in a spreadsheet application or processed with Python for later analysis.
-
-Do not upload the log publicly because it may contain usernames, local file paths, application names, and other system information.
-
-## Automatic Startup
-
-To run the watchdog when you sign in:
-
-1. Open **Task Scheduler**.
-2. Select **Create Task**.
-3. Set the trigger to **At log on**.
-4. Set the action to start `pythonw.exe`.
-5. Pass the path to `camera_watchdog.py` as the argument.
-6. Set the project directory as the working directory.
-7. Test the task manually before relying on it.
-
-Example configuration:
-
-```text
-Program:
-C:\Path\To\Python\pythonw.exe
-
-Arguments:
-C:\Path\To\Camera-Access-Watchdog\camera_watchdog.py
-
-Start in:
-C:\Path\To\Camera-Access-Watchdog
-```
+Clipboard contents may be accessible to other applications on the system. Avoid copying sensitive information on shared or untrusted computers.
 
 ## Project Structure
 
 ```text
-Camera-Access-Watchdog/
-├── camera_watchdog.py
-├── requirements.txt
-├── trusted_apps.txt
-├── camera_access_log.csv
+TempShield/
+├── src/
+│   └── TempMailApp.java
+├── out/
+├── json-20231013.jar
+├── build_and_run.bat
+├── build_and_run.sh
 ├── README.md
 ├── LICENSE
 └── .gitignore
 ```
 
-Do not commit local logs or virtual-environment files. Add them to `.gitignore`:
+Do not commit local build files, secrets, or private email content. A suitable `.gitignore` may include:
 
 ```gitignore
+out/
+*.class
 .venv/
 __pycache__/
-*.pyc
-camera_access_log.csv
-trusted_apps.txt
+*.log
 ```
+
+## Architecture
+
+```text
+                 Java Swing UI
+                       │
+                       ▼
+               Email Controller
+                       │
+        ┌──────────────┴──────────────┐
+        │                             │
+        ▼                             ▼
+ Guerrilla Mail API          Background Polling
+        │                    (ExecutorService)
+        │                             │
+        └──────────────┬──────────────┘
+                       ▼
+               Email Message Parser
+                       │
+                       ▼
+          OTP Detection & Clipboard
+```
+
+## Screenshots
+
+### Home Screen
+
+_Add screenshot here._
+
+### Inbox
+
+_Add screenshot here._
+
+### Email Viewer
+
+_Add screenshot here._
 
 ## Limitations
 
-- The project is Windows-only.
-- Registry-based records may not represent every possible camera event.
-- Packaged Microsoft Store applications may expose a package family name instead of a directly killable process ID.
-- Process identification may fail when an application has already exited or Windows does not expose a matching process.
-- Terminating a process can cause unsaved work or application instability.
-- Administrator privileges may be required to terminate some processes.
-- The tool does not inspect camera firmware, driver internals, or hardware signals.
-- It does not guarantee detection of every form of camera compromise.
-- A physical camera cover remains the most reliable way to prevent unwanted optical capture.
+- Depends on the availability and behavior of the Guerrilla Mail API.
+- Requires an active internet connection.
+- Disposable email domains may be blocked by third-party services.
+- Mailbox lifetime may be limited.
+- Inbox polling may delay message updates.
+- OTP detection depends on the format of the email.
+- Message delivery is not guaranteed.
+- The application does not provide permanent email storage.
+- Temporary inboxes may not be private or suitable for confidential information.
+- API behavior, supported domains, and service policies may change.
+- The application is not a replacement for a secure permanent email provider.
 
-## Security Notes
-
-This project is a monitoring and investigation utility, not a replacement for endpoint-security software.
+## Privacy and Security Notes
 
 For safer use:
 
-- Review the executable path before terminating a process.
-- Do not automatically kill every unknown process.
-- Keep Windows and security software updated.
-- Do not run untrusted scripts with administrator privileges.
-- Avoid committing personal logs or trusted-application lists to a public repository.
-- Test the tool in a controlled environment before enabling automatic startup.
+- Do not use disposable inboxes for banking, recovery, healthcare, or other sensitive accounts.
+- Do not store passwords, private documents, or financial information in temporary mailboxes.
+- Do not share mailbox addresses containing private messages.
+- Review email content before copying OTPs or verification codes.
+- Follow the Guerrilla Mail terms of service.
+- Do not use TempShield for spam, fraud, harassment, or unauthorized access.
+- Avoid logging or publishing email content without permission.
+- Review third-party dependencies before building the application.
+
+## Safe Testing Uses
+
+TempShield may be useful for:
+
+- Testing email verification flows in applications you own.
+- Local development and QA workflows.
+- Demonstrating email polling and JSON parsing.
+- Testing OTP extraction logic.
+- Educational Java Swing projects.
+- Privacy-conscious uses where temporary email is explicitly permitted.
+
+Do not use it to:
+
+- Circumvent identity, age, or access verification.
+- Create accounts in violation of a service's rules.
+- Evade bans or rate limits.
+- Send unsolicited bulk email.
+- Impersonate another person or organization.
+- Obtain unauthorized access to services.
 
 ## Testing Checklist
 
-Before using the tool continuously, test the following:
+Before using the application regularly, test the following:
 
-- Open the Windows Camera application.
-- Start a video call in Teams, Zoom, or Discord.
-- Add and remove an application from `trusted_apps.txt`.
-- Run the `--status` command.
-- Confirm that events are written to the CSV log.
-- Verify that process termination is handled safely.
-- Test behavior when an application closes before the event is processed.
-- Test behavior with a packaged Microsoft Store application.
+- Generate a disposable email address.
+- Send a test message to the generated address.
+- Confirm that the inbox refreshes correctly.
+- Open and read a received message.
+- Test OTP detection with different code formats.
+- Copy the email address and OTP to the clipboard.
+- Confirm that the mailbox countdown updates correctly.
+- Test behavior when the API is unavailable.
+- Test behavior when the network connection is interrupted.
+- Confirm that background tasks stop when the application closes.
 
 ## Future Improvements
 
-- Add automated tests for registry parsing and event comparison.
-- Add configurable polling intervals through command-line arguments.
-- Add structured JSON logging alongside CSV logging.
-- Add Windows Event Log integration.
-- Add a system-tray interface.
-- Add signed release packages.
-- Improve packaged-app detection and user guidance.
-- Add notification throttling to prevent repeated alerts.
-- Add an optional read-only mode that disables process termination.
+- Add desktop notifications.
+- Add email attachment support.
+- Support multiple inboxes.
+- Add configurable polling intervals.
+- Export emails to text, JSON, or HTML.
+- Add a cross-platform installer.
+- Create a JavaFX version.
+- Add push notification support.
+- Add email search.
+- Add email history.
+- Improve OTP and verification-code detection.
+- Add configurable mailbox expiration.
+- Add API retry and error handling.
+- Add unit tests for API and parser components.
+- Add a read-only privacy mode.
+- Add localization support.
 
 ## License
 
-This project is licensed under the MIT License.
-
+This project is licensed under the MIT License. See the [LICENSE](./LICENSE) file for details.
 
 ## Author
 
@@ -263,3 +300,11 @@ This project is licensed under the MIT License.
 
 - GitHub: [Adarshmishra87](https://github.com/Adarshmishra87)
 - LinkedIn: [adarsh-mishra-4b5792319](https://linkedin.com/in/adarsh-mishra-4b5792319)
+
+## Repository
+
+[TempShield](https://github.com/Adarshmishra87/TempShield)
+
+---
+
+Developed with ❤️ using Java.
