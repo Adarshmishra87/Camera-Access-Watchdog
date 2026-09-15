@@ -1,10 +1,27 @@
 # Camera Access Watchdog
 
-A Windows security-monitoring tool that detects camera-access activity, identifies the responsible application or process when possible, and alerts you in real time.
+A Windows security-monitoring tool that detects camera-access activity, identifies the responsible application or process when possible, and alerts the user in real time.
 
-The tool monitors Windows camera-access records through the `CapabilityAccessManager` ConsentStore, resolves process information with `psutil`, and maintains an audit log of camera events and user decisions.
+The tool monitors Windows camera-access records through the `CapabilityAccessManager` ConsentStore, attempts to resolve process information using `psutil`, and records events and user decisions in a CSV audit log.
 
-> Windows only. This project uses Windows registry data and Windows-specific APIs.
+> Windows only. This project depends on Windows-specific registry keys and APIs.
+
+## Demo Video
+
+Watch the Camera Access Watchdog detect camera activity, identify the responsible process, display an alert, and record the event.
+
+[▶️ Watch the full demo](VIDEO_URL_HERE)
+
+### Demo covers
+
+- Camera-access event detection.
+- Responsible application and process identification.
+- Real-time alert generation.
+- Allow and Block & Kill actions.
+- Trusted-application allowlisting.
+- CSV audit logging.
+
+> Replace `VIDEO_URL_HERE` with the GitHub video URL generated after uploading your `.mp4` file.
 
 ## Features
 
@@ -12,16 +29,18 @@ The tool monitors Windows camera-access records through the `CapabilityAccessMan
 - Detects camera open and close activity where Windows exposes corresponding records.
 - Identifies the responsible application, executable path, and process ID when available.
 - Displays real-time alerts for unexpected camera activity.
-- Supports `Allow` and `Block & Kill` actions from the alert window.
+- Supports `Allow` and `Block & Kill` actions.
 - Logs camera events and user decisions to a CSV audit file.
-- Supports a trusted-app allowlist for applications such as Teams, Zoom, Discord, and browsers.
-- Provides a one-shot status check for current camera activity.
+- Supports a trusted-application allowlist.
+- Provides a one-shot camera-status check.
 - Supports background monitoring through Windows Task Scheduler.
-- Keeps packaged-app limitations visible instead of silently reporting incomplete process information.
+- Handles packaged-application limitations without silently treating missing process information as a failure.
 
 ## How It Works
 
-Windows manages application permissions for sensitive resources such as the camera through its privacy and capability-management systems. This project reads camera-related entries from the Windows `CapabilityAccessManager` ConsentStore and compares changes over time. [126][127]
+Windows manages application permissions for sensitive resources such as the camera through its privacy and capability-management systems.
+
+This project reads camera-related entries from the Windows `CapabilityAccessManager` ConsentStore and compares changes over time.
 
 When a relevant change is detected, the tool:
 
@@ -29,17 +48,17 @@ When a relevant change is detected, the tool:
 2. Identifies the application or package.
 3. Attempts to resolve a live process using `psutil`.
 4. Displays an alert when the application is not trusted.
-5. Records the event and the user's decision in a CSV log.
+5. Records the event and user decision in the CSV audit log.
 
 The tool does not query or control the physical webcam LED. It monitors operating-system records instead.
 
 ## Requirements
 
-- Windows 10 or Windows 11
-- Python 3.9 or later
-- Permission to read the required registry entries
-- `psutil`
-- Tkinter, if the graphical alert interface is enabled
+- Windows 10 or Windows 11.
+- Python 3.9 or later.
+- `psutil`.
+- Tkinter, if the graphical alert interface is enabled.
+- Permission to read the required Windows registry entries.
 
 ## Installation
 
@@ -50,14 +69,19 @@ git clone [https://github.com/Adarshmishra87/Camera-Access-Watchdog.git](https:/
 cd Camera-Access-Watchdog
 ```
 
-Create and activate a virtual environment:
+Create a virtual environment:
 
 ```bash
 python -m venv .venv
+```
+
+Activate it on Windows:
+
+```bash
 .venv\Scripts\activate
 ```
 
-Install the dependencies:
+Install dependencies:
 
 ```bash
 pip install -r requirements.txt
@@ -71,7 +95,7 @@ pip install -r requirements.txt
 python camera_watchdog.py
 ```
 
-The tool polls camera-access records and displays an alert when it detects activity from an application that is not trusted.
+The tool continuously monitors camera-access records and displays an alert when it detects activity from an application that is not trusted.
 
 ### Check current camera status
 
@@ -81,9 +105,9 @@ python camera_watchdog.py --status
 
 This performs a one-time status check and exits.
 
-### Run without a visible console
+### Run without a console window
 
-Use `pythonw.exe` when launching the application through a shortcut or Task Scheduler:
+Use `pythonw.exe` when launching the tool through a shortcut or Windows Task Scheduler:
 
 ```bash
 pythonw.exe camera_watchdog.py
@@ -103,15 +127,15 @@ msedge.exe
 
 Trusted applications will not trigger a popup, but their events should still be recorded in the audit log.
 
-Use one executable name per line. Avoid adding an application to the allowlist unless you recognize and trust it.
+Use one executable name per line. Add an application only if you recognize and trust it.
 
 ## Alert Actions
 
-When an alert is displayed, the available actions are:
+When an alert is displayed, the tool can provide the following actions:
 
-- **Allow**: dismiss the alert and keep monitoring.
-- **Block & Kill**: attempt to terminate the identified process.
-- **Ignore or close**: keep the process running while recording the event, depending on the implementation.
+- **Allow:** Dismiss the alert and continue monitoring.
+- **Block & Kill:** Attempt to terminate the identified process.
+- **Ignore or close:** Keep the process running while recording the event, depending on the implementation.
 
 Process termination may fail when:
 
@@ -143,9 +167,9 @@ access_state
 user_action
 ```
 
-The log can be opened in a spreadsheet application or processed with Python for later review.
+The log can be opened in a spreadsheet application or processed with Python for later analysis.
 
-Do not upload the log publicly because it may contain usernames, file paths, application names, or other system information.
+Do not upload the log publicly because it may contain usernames, local file paths, application names, and other system information.
 
 ## Automatic Startup
 
@@ -159,7 +183,7 @@ To run the watchdog when you sign in:
 6. Set the project directory as the working directory.
 7. Test the task manually before relying on it.
 
-Example:
+Example configuration:
 
 ```text
 Program:
@@ -181,6 +205,7 @@ Camera-Access-Watchdog/
 ├── trusted_apps.txt
 ├── camera_access_log.csv
 ├── README.md
+├── LICENSE
 └── .gitignore
 ```
 
@@ -199,16 +224,16 @@ trusted_apps.txt
 - The project is Windows-only.
 - Registry-based records may not represent every possible camera event.
 - Packaged Microsoft Store applications may expose a package family name instead of a directly killable process ID.
-- Process identification may fail when an application has already exited or when Windows does not expose a matching process.
+- Process identification may fail when an application has already exited or Windows does not expose a matching process.
 - Terminating a process can cause unsaved work or application instability.
 - Administrator privileges may be required to terminate some processes.
-- This tool does not inspect camera firmware, driver internals, or hardware signals.
+- The tool does not inspect camera firmware, driver internals, or hardware signals.
 - It does not guarantee detection of every form of camera compromise.
 - A physical camera cover remains the most reliable way to prevent unwanted optical capture.
 
 ## Security Notes
 
-This project is a monitoring and investigation utility, not a replacement for endpoint security software.
+This project is a monitoring and investigation utility, not a replacement for endpoint-security software.
 
 For safer use:
 
@@ -219,9 +244,9 @@ For safer use:
 - Avoid committing personal logs or trusted-application lists to a public repository.
 - Test the tool in a controlled environment before enabling automatic startup.
 
-## Testing
+## Testing Checklist
 
-Before using the tool continuously, test the following scenarios:
+Before using the tool continuously, test the following:
 
 - Open the Windows Camera application.
 - Start a video call in Teams, Zoom, or Discord.
@@ -229,14 +254,14 @@ Before using the tool continuously, test the following scenarios:
 - Run the `--status` command.
 - Confirm that events are written to the CSV log.
 - Verify that process termination is handled safely.
-- Test behavior when the application closes before the event is processed.
+- Test behavior when an application closes before the event is processed.
 - Test behavior with a packaged Microsoft Store application.
 
 ## Future Improvements
 
 - Add automated tests for registry parsing and event comparison.
 - Add configurable polling intervals through command-line arguments.
-- Add structured JSON logging in addition to CSV output.
+- Add structured JSON logging alongside CSV logging.
 - Add Windows Event Log integration.
 - Add a system-tray interface.
 - Add signed release packages.
@@ -246,13 +271,7 @@ Before using the tool continuously, test the following scenarios:
 
 ## License
 
-Add your chosen license here, for example:
-
-```text
-MIT License
-```
-
-If the repository does not yet include a `LICENSE` file, create one before claiming that the project is released under the MIT License.
+This project is licensed under the MIT License. See the [LICENSE](LICENSE) file for details.
 
 ## Author
 
