@@ -10,7 +10,7 @@ The tool monitors Windows camera-access records through the `CapabilityAccessMan
 
 Watch the Camera Access Watchdog detect camera activity, identify the responsible process, display an alert, and record the event.
 
-[▶️ Watch the full demo](https://drive.google.com/file/d/1zXEDK5aGCGA-_3yhW_Ma6pEm9d-WVDoO/view?usp=sharing)
+[▶️ Watch the full demo](https://drive.google.com/file/d/1uhsB0kK04E2mud7bQ-QQpAXGJYtQnLLs/view?usp=drive_link)
 
 ### Demo covers
 
