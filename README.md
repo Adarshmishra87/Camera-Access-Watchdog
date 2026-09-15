@@ -6,23 +6,6 @@ The tool monitors Windows camera-access records through the `CapabilityAccessMan
 
 > Windows only. This project depends on Windows-specific registry keys and APIs.
 
-## Demo Video
-
-Watch the Camera Access Watchdog detect camera activity, identify the responsible process, display an alert, and record the event.
-
-[▶️ Watch the full demo](https://drive.google.com/file/d/1uhsB0kK04E2mud7bQ-QQpAXGJYtQnLLs/view?usp=drive_link)
-
-### Demo covers
-
-- Camera-access event detection.
-- Responsible application and process identification.
-- Real-time alert generation.
-- Allow and Block & Kill actions.
-- Trusted-application allowlisting.
-- CSV audit logging.
-
-> Replace `VIDEO_URL_HERE` with the GitHub video URL generated after uploading your `.mp4` file.
-
 ## Features
 
 - Polls camera-access records at a configurable interval.
